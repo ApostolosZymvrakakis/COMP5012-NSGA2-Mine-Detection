@@ -1,7 +1,7 @@
 """
 COMP5012 - Computational Intelligence
 Multi-Objective Optimisation for Underwater Mine Detection using NSGA-II
-Author: Apostolos Zymvrakakis
+Author: 25126736
 University of Plymouth
 """
 
