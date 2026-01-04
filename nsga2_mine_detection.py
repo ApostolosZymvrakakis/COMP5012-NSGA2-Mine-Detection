@@ -239,20 +239,20 @@ def nsga2(cost_matrix, prob_matrix, pop_size, generations, mutation_rate,
 # =============================================================================
 
 # Experiment A: Statistical Validation (Multiple Runs)
-N_RUNS = 30
-POP_SIZE_A = 200
-GENERATIONS_A = 200
+N_RUNS = 2
+POP_SIZE_A = 50
+GENERATIONS_A = 20
 MUTATION_RATE_A = 0.1
 
 # Experiment B: Parameter Sensitivity
-POP_SIZES = [50, 100, 200]
-GENERATION_VALUES = [50, 100, 200]
-MUTATION_RATES = [0.05, 0.1, 0.2]
-N_RUNS_B = 5
+POP_SIZES = [50, 100]
+GENERATION_VALUES = [20, 50]
+MUTATION_RATES = [0.1]
+N_RUNS_B = 1
 
 # Experiment C: Convergence Analysis
-GENERATIONS_C = 200
-POP_SIZE_C = 200
+GENERATIONS_C = 20
+POP_SIZE_C = 50
 
 # General Settings
 CROSSOVER_RATE = 0.9
@@ -389,6 +389,103 @@ def run_experiment_C(cost_matrix, prob_matrix):
 # VISUALIZATION
 # =============================================================================
 
+def visualize_cost_matrix(cost_matrix):
+    """Visualize the cost matrix from OR-Library dataset."""
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+    # Heatmap
+    ax1 = axes[0]
+    im = ax1.imshow(cost_matrix, cmap='YlOrRd', aspect='auto')
+    ax1.set_xlabel('Area Index (j)', fontsize=12)
+    ax1.set_ylabel('Drone Index (i)', fontsize=12)
+    ax1.set_title('Cost Matrix c(i,j)\nCost of assigning drone i to area j', fontsize=12)
+    plt.colorbar(im, ax=ax1, label='Cost')
+
+    # Histogram
+    ax2 = axes[1]
+    ax2.hist(cost_matrix.flatten(), bins=30, edgecolor='black', alpha=0.7, color='coral')
+    ax2.set_xlabel('Cost Value', fontsize=12)
+    ax2.set_ylabel('Frequency', fontsize=12)
+    ax2.set_title('Distribution of Cost Values', fontsize=12)
+    ax2.axvline(cost_matrix.mean(), color='red', linestyle='--', linewidth=2,
+                label=f'Mean: {cost_matrix.mean():.1f}')
+    ax2.legend(fontsize=11)
+
+    plt.tight_layout()
+    plt.savefig('figure1_cost_matrix.png', dpi=150, bbox_inches='tight')
+    plt.close()
+    print("Saved: figure1_cost_matrix.png")
+
+
+def visualize_pareto_front(population):
+    """Visualize the final Pareto front with annotations."""
+    pareto = [p for p in population if p.rank == 0]
+    costs = [p.cost for p in pareto]
+    detections = [p.detection for p in pareto]
+
+    plt.figure(figsize=(10, 8))
+    plt.scatter(costs, detections, c='blue', s=50, alpha=0.7,
+                edgecolors='black', linewidths=0.5)
+
+    plt.xlabel('Total Mission Cost (Minimize)', fontsize=12)
+    plt.ylabel('Total Detection Probability (Maximize)', fontsize=12)
+    plt.title('NSGA-II Pareto Front\nDrone Assignment Optimization',
+              fontsize=14, fontweight='bold')
+    plt.grid(True, alpha=0.3)
+
+    # Annotations for extreme solutions
+    min_cost_idx = np.argmin(costs)
+    max_det_idx = np.argmax(detections)
+
+    plt.annotate(f'Min Cost\n({costs[min_cost_idx]:.0f}, {detections[min_cost_idx]:.2f})',
+                 xy=(costs[min_cost_idx], detections[min_cost_idx]),
+                 xytext=(10, -20), textcoords='offset points',
+                 fontsize=9, ha='left',
+                 arrowprops=dict(arrowstyle='->', color='red'))
+
+    plt.annotate(f'Max Detection\n({costs[max_det_idx]:.0f}, {detections[max_det_idx]:.2f})',
+                 xy=(costs[max_det_idx], detections[max_det_idx]),
+                 xytext=(10, 10), textcoords='offset points',
+                 fontsize=9, ha='left',
+                 arrowprops=dict(arrowstyle='->', color='green'))
+
+    plt.tight_layout()
+    plt.savefig('figure2_pareto_front.png', dpi=150, bbox_inches='tight')
+    plt.close()
+    print("Saved: figure2_pareto_front.png")
+
+
+def visualize_convergence(history):
+    """Visualize convergence with 3 plots in a row."""
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+
+    # Pareto Front Growth
+    axes[0].plot(history['generation'], history['pareto_size'], 'b-', linewidth=2)
+    axes[0].set_xlabel('Generation')
+    axes[0].set_ylabel('Pareto Front Size')
+    axes[0].set_title('Pareto Front Growth')
+    axes[0].grid(True, alpha=0.3)
+
+    # Best Cost Evolution
+    axes[1].plot(history['generation'], history['best_cost'], 'r-', linewidth=2)
+    axes[1].set_xlabel('Generation')
+    axes[1].set_ylabel('Best Cost')
+    axes[1].set_title('Best Cost Evolution')
+    axes[1].grid(True, alpha=0.3)
+
+    # Best Detection Evolution
+    axes[2].plot(history['generation'], history['best_detection'], 'g-', linewidth=2)
+    axes[2].set_xlabel('Generation')
+    axes[2].set_ylabel('Best Detection')
+    axes[2].set_title('Best Detection Evolution')
+    axes[2].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig('convergence.png', dpi=150, bbox_inches='tight')
+    plt.close()
+    print("Saved: convergence.png")
+
+
 def create_visualizations(results_A, results_B, history_C, population_C):
     # Figure 2: Multiple Runs Results
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
@@ -510,12 +607,26 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("Creating Visualizations...")
     print("=" * 60)
+
+    # Cost matrix visualization
+    visualize_cost_matrix(cost_matrix)
+
+    # Pareto front visualization
+    visualize_pareto_front(population_C)
+
+    # Convergence visualization (1x3 layout)
+    visualize_convergence(history_C)
+
+    # Other visualizations
     create_visualizations(results_A, results_B, history_C, population_C)
 
     print("\n" + "=" * 70)
     print("COMPLETE!")
     print("=" * 70)
     print("\nFiles created:")
+    print("  - figure1_cost_matrix.png")
+    print("  - figure2_pareto_front.png")
+    print("  - convergence.png")
     print("  - exp_A_multiple_runs.png")
     print("  - exp_B_parameters.png")
     print("  - exp_C_convergence.png")
