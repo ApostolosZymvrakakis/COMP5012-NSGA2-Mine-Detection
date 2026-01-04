@@ -239,20 +239,20 @@ def nsga2(cost_matrix, prob_matrix, pop_size, generations, mutation_rate,
 # =============================================================================
 
 # Experiment A: Statistical Validation (Multiple Runs)
-N_RUNS = 2
-POP_SIZE_A = 50
-GENERATIONS_A = 20
+N_RUNS = 30
+POP_SIZE_A = 200
+GENERATIONS_A = 200
 MUTATION_RATE_A = 0.1
 
 # Experiment B: Parameter Sensitivity
-POP_SIZES = [50, 100]
-GENERATION_VALUES = [20, 50]
-MUTATION_RATES = [0.1]
+POP_SIZES = [50, 100, 200]
+GENERATION_VALUES = [50, 100, 200]
+MUTATION_RATES = [0.05, 0.1, 0.2]
 N_RUNS_B = 1
 
 # Experiment C: Convergence Analysis
-GENERATIONS_C = 20
-POP_SIZE_C = 50
+GENERATIONS_C = 200
+POP_SIZE_C = 200
 
 # General Settings
 CROSSOVER_RATE = 0.9
