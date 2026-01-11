@@ -27,5 +27,5 @@ python nsga2_mine_detection.py
 - Matplotlib
 
 ## Author
-Apostolos Zymvrakakis  
+25126736 
 University of Plymouth - COMP5012
